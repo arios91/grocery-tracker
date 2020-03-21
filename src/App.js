@@ -1,25 +1,32 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useState} from 'react';
+import Navbar from './components/Navbar';
+import Stores from './components/Stores';
+import ListItem from './components/ListItem';
+import List from './components/List';
+import ActionCenter from './components/ActionCenter';
+import {fetchToDos} from './actions/stores';
 import './App.css';
 
+//Redux
+import { Provider } from 'react-redux';
+import store from './store';
+
 function App() {
+  fetchToDos();
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Provider store={store}>
+      <div className="App w-100 h-100">
+        <Navbar/>
+        <ActionCenter/>
+        <Stores/>
+        <List/>
+        {/* <ListItem/> */}
+
+      </div>
+
+    </Provider>
+
   );
 }
 
