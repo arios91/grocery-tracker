@@ -1,4 +1,4 @@
-import {GET_STORES, UPDATE_STORE, ADD_STORE} from '../actions/constants';
+import {GET_STORES, UPDATE_STORE, ADD_STORE, ADD_ITEM} from '../actions/constants';
 const initialState = {
     stores: [],
     error: {},
@@ -7,8 +7,7 @@ const initialState = {
 
 export default function(state = initialState, action){
     const {type, payload} = action;
-    console.log(type);
-    console.log(payload);
+    // console.log(type);
 
     switch(type){
         case GET_STORES:
@@ -26,7 +25,9 @@ export default function(state = initialState, action){
         case UPDATE_STORE:
             return{
                 ...state,
-                stores: state.stores.map(store => store._id === payload._id ? payload : store),
+                stores: state.stores.map(store => store.id === payload.id ? 
+                    payload
+                    : store),
                 loading: false
             }
         default:

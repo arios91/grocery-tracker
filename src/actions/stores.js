@@ -1,50 +1,69 @@
 import db from '../firebase';
-import {GET_STORES} from './constants';
+import {GET_STORES, GET_ITEMS, SET_ALERT} from './constants';
+import {setAlert} from './alert';
 
 export const addStore = newStore => async dispatch =>{
-    // storesRef.push().set(newStore);
+    db.collection("stores").add(newStore);
 }
 
 export const getStores = () => async dispatch => {
-    console.log('in here');
-    // storesRef.on("value", snapshot => {
-    //     dispatch({
-    //         type: GET_STORES,
-    //         payload: snapshot.val()
-    //     })
-    // })
+    var stores = [];
+    const data = await db.collection("stores").get();
+    data.forEach(doc => {
+        let tmpStore = {
+            id: doc.id,
+            ...doc.data(),
+            items: []
+        };
+        stores.push(tmpStore);
+    })
+    if(stores.length > 0){
+        dispatch({
+            type: GET_STORES,
+            payload: stores
+        })
+    }
 }
 
-
-const FETCH_TODOS = 'FETCH_TODOS';
-export const addTodo = newTodo => async dispatch => {
-    console.log(newTodo);
-    db.collection("todos").add({
-        title: newTodo
-    });
-};
-
-export const completeTodo = completeToDo => async dispatch => {
-    // storesRef.child(completeToDo).remove();
-};
-
-export const fetchToDos = () => async dispatch => {
-    console.log('fetching');
-    var todos = [];
-    const data = await db.collection("todos").get();
-    data.forEach(doc => {
-        let tmpTodo = {
-            id: doc.id,
-            title: doc.data().title
-        };
-        todos.push(tmpTodo);
+export const getItems = () => async dispatch => {
+    let observer = await db.collection("items");
+    observer.onSnapshot(doc =>{
+        var items = [];
+        doc.forEach(snap => {
+            let tmpItem = {
+                id: snap.id,
+                name: snap.data().name,
+                quantity: snap.data().quantity,
+                stocked: snap.data().stocked,
+                storeId: snap.data().storeId,
+                updateDate: snap.data().updateDate,
+                verified: snap.data().verified,
+            };
+            items.push(tmpItem);
+        })
+        if(items.length > 0){
+            dispatch({
+                type: GET_ITEMS,
+                payload: items
+            })
+        }
     })
-    console.log(todos);
-    // console.log(data);
-//     storesRef.on("value", snapshot => {
-//     dispatch({
-//       type: FETCH_TODOS,
-//       payload: snapshot.val()
-//     });
-//   });
-};
+}
+
+export const addItemToStore = newItem => async dispatch =>{
+    db.collection("items").add(newItem);
+    dispatch(setAlert('Added Item', 'success'))
+}
+
+export const updateItem = updatedItem => async dispatch =>{
+    console.log(updatedItem);
+    let observer = await db.collection("items").doc(updatedItem.id);
+
+    observer.update({
+        updateDate: new Date(),
+        quantity: updatedItem.quantity,
+        verified: updatedItem.verified
+    })
+    
+    dispatch(setAlert('Updated Item', 'success'))
+}
